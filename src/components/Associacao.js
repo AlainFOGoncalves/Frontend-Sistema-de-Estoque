@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function Associacao() {
   const [produtos, setProdutos] = useState([]);
@@ -10,7 +11,6 @@ function Associacao() {
     fornecedor_id: ''
   });
 
-  // Carregar produtos e fornecedores ao iniciar
   useEffect(() => {
     fetchProdutos();
     fetchFornecedores();
@@ -21,6 +21,7 @@ function Associacao() {
       const response = await axios.get('http://localhost:3000/produtos');
       setProdutos(response.data);
     } catch (error) {
+      toast.error('Erro ao buscar produtos!');
       console.error('Erro ao buscar produtos:', error);
     }
   };
@@ -30,6 +31,7 @@ function Associacao() {
       const response = await axios.get('http://localhost:3000/fornecedores');
       setFornecedores(response.data);
     } catch (error) {
+      toast.error('Erro ao buscar fornecedores!');
       console.error('Erro ao buscar fornecedores:', error);
     }
   };
@@ -39,6 +41,7 @@ function Associacao() {
       const response = await axios.get(`http://localhost:3000/produtos/${produtoId}/fornecedores`);
       setAssociacoes(response.data);
     } catch (error) {
+      toast.error('Erro ao buscar associações!');
       console.error('Erro ao buscar associações:', error);
     }
   };
@@ -46,7 +49,7 @@ function Associacao() {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (e.target.name === 'produto_id' && e.target.value) {
-      fetchAssociacoes(e.target.value); // Atualizar associações ao selecionar produto
+      fetchAssociacoes(e.target.value);
     }
   };
 
@@ -57,8 +60,10 @@ function Associacao() {
         produto_id: parseInt(formData.produto_id),
         fornecedor_id: parseInt(formData.fornecedor_id)
       });
-      fetchAssociacoes(formData.produto_id); // Atualizar lista
+      toast.success('Fornecedor associado com sucesso!');
+      fetchAssociacoes(formData.produto_id);
     } catch (error) {
+      toast.error(error.response?.data?.mensagem || 'Erro ao associar!');
       console.error('Erro ao associar:', error);
     }
   };
@@ -71,8 +76,10 @@ function Associacao() {
           fornecedor_id: fornecedorId
         }
       });
-      fetchAssociacoes(formData.produto_id); // Atualizar lista
+      toast.success('Fornecedor desassociado com sucesso!');
+      fetchAssociacoes(formData.produto_id);
     } catch (error) {
+      toast.error(error.response?.data?.mensagem || 'Erro ao desassociar!');
       console.error('Erro ao desassociar:', error);
     }
   };

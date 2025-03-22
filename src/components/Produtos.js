@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function Produtos() {
   const [produtos, setProdutos] = useState([]);
@@ -22,6 +23,7 @@ function Produtos() {
       const response = await axios.get('http://localhost:3000/produtos');
       setProdutos(response.data);
     } catch (error) {
+      toast.error('Erro ao buscar produtos!');
       console.error('Erro ao buscar produtos:', error);
     }
   };
@@ -36,13 +38,16 @@ function Produtos() {
       const data = { ...formData, quantidade: parseInt(formData.quantidade) };
       if (isEditing) {
         await axios.put(`http://localhost:3000/produtos/${formData.id}`, data);
+        toast.success('Produto atualizado com sucesso!');
         setIsEditing(false);
       } else {
         await axios.post('http://localhost:3000/produtos', data);
+        toast.success('Produto cadastrado com sucesso!');
       }
       fetchProdutos();
       setFormData({ id: null, nome: '', codigo_barras: '', descricao: '', quantidade: '', categoria: '' });
     } catch (error) {
+      toast.error(error.response?.data?.mensagem || 'Erro ao salvar produto!');
       console.error('Erro ao salvar produto:', error);
     }
   };
@@ -56,8 +61,10 @@ function Produtos() {
     if (window.confirm('Tem certeza que deseja deletar este produto?')) {
       try {
         await axios.delete(`http://localhost:3000/produtos/${id}`);
+        toast.success('Produto deletado com sucesso!');
         fetchProdutos();
       } catch (error) {
+        toast.error(error.response?.data?.mensagem || 'Erro ao deletar produto!');
         console.error('Erro ao deletar produto:', error);
       }
     }

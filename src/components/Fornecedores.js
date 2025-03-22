@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 function Fornecedores() {
   const [fornecedores, setFornecedores] = useState([]);
@@ -23,6 +24,7 @@ function Fornecedores() {
       const response = await axios.get('http://localhost:3000/fornecedores');
       setFornecedores(response.data);
     } catch (error) {
+      toast.error('Erro ao buscar fornecedores!');
       console.error('Erro ao buscar fornecedores:', error);
     }
   };
@@ -36,13 +38,16 @@ function Fornecedores() {
     try {
       if (isEditing) {
         await axios.put(`http://localhost:3000/fornecedores/${formData.id}`, formData);
+        toast.success('Fornecedor atualizado com sucesso!');
         setIsEditing(false);
       } else {
         await axios.post('http://localhost:3000/fornecedores', formData);
+        toast.success('Fornecedor cadastrado com sucesso!');
       }
       fetchFornecedores();
       setFormData({ id: null, nome: '', cnpj: '', endereco: '', telefone: '', email: '', contato: '' });
     } catch (error) {
+      toast.error(error.response?.data?.mensagem || 'Erro ao salvar fornecedor!');
       console.error('Erro ao salvar fornecedor:', error);
     }
   };
@@ -56,8 +61,10 @@ function Fornecedores() {
     if (window.confirm('Tem certeza que deseja deletar este fornecedor?')) {
       try {
         await axios.delete(`http://localhost:3000/fornecedores/${id}`);
+        toast.success('Fornecedor deletado com sucesso!');
         fetchFornecedores();
       } catch (error) {
+        toast.error(error.response?.data?.mensagem || 'Erro ao deletar fornecedor!');
         console.error('Erro ao deletar fornecedor:', error);
       }
     }
