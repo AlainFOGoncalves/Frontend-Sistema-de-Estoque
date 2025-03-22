@@ -4,12 +4,14 @@ import axios from 'axios';
 function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [formData, setFormData] = useState({
+    id: null,
     nome: '',
     codigo_barras: '',
     descricao: '',
     quantidade: '',
     categoria: ''
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchProdutos();
@@ -31,15 +33,39 @@ function Produtos() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/produtos', {
-        ...formData,
-        quantidade: parseInt(formData.quantidade) // Converter para número
-      });
+      const data = { ...formData, quantidade: parseInt(formData.quantidade) };
+      if (isEditing) {
+        await axios.put(`http://localhost:3000/produtos/${formData.id}`, data);
+        setIsEditing(false);
+      } else {
+        await axios.post('http://localhost:3000/produtos', data);
+      }
       fetchProdutos();
-      setFormData({ nome: '', codigo_barras: '', descricao: '', quantidade: '', categoria: '' });
+      setFormData({ id: null, nome: '', codigo_barras: '', descricao: '', quantidade: '', categoria: '' });
     } catch (error) {
-      console.error('Erro ao cadastrar produto:', error);
+      console.error('Erro ao salvar produto:', error);
     }
+  };
+
+  const handleEdit = (produto) => {
+    setFormData(produto);
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja deletar este produto?')) {
+      try {
+        await axios.delete(`http://localhost:3000/produtos/${id}`);
+        fetchProdutos();
+      } catch (error) {
+        console.error('Erro ao deletar produto:', error);
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setFormData({ id: null, nome: '', codigo_barras: '', descricao: '', quantidade: '', categoria: '' });
+    setIsEditing(false);
   };
 
   return (
@@ -83,7 +109,26 @@ function Produtos() {
             onChange={handleChange}
             placeholder="Categoria"
           />
-          <button type="submit">Cadastrar Produto</button>
+          <button type="submit">
+            {isEditing ? 'Atualizar Produto' : 'Cadastrar Produto'}
+          </button>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              style={{
+                backgroundColor: '#6c757d',
+                color: '#fff',
+                padding: '10px',
+                border: 'none',
+                borderRadius: '4px',
+                marginLeft: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancelar
+            </button>
+          )}
         </form>
       </div>
 
@@ -98,6 +143,7 @@ function Produtos() {
               <th>Descrição</th>
               <th>Quantidade</th>
               <th>Categoria</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -109,6 +155,35 @@ function Produtos() {
                 <td>{produto.descricao}</td>
                 <td>{produto.quantidade}</td>
                 <td>{produto.categoria}</td>
+                <td>
+                  <button
+                    onClick={() => handleEdit(produto)}
+                    style={{
+                      backgroundColor: '#ffc107',
+                      color: '#fff',
+                      padding: '5px 10px',
+                      border: 'none',
+                      borderRadius: '4px',
+                      marginRight: '5px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(produto.id)}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: '#fff',
+                      padding: '5px 10px',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Deletar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

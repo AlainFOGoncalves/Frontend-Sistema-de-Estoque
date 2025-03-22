@@ -82,3 +82,11 @@ th {
 .table-container button:hover {
   background-color: #c82333;
 }
+
+.form-container button {
+  margin-right: 10px;
+}
+
+.table-container button:hover {
+  opacity: 0.8;
+}

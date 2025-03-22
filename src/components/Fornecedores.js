@@ -4,6 +4,7 @@ import axios from 'axios';
 function Fornecedores() {
   const [fornecedores, setFornecedores] = useState([]);
   const [formData, setFormData] = useState({
+    id: null,
     nome: '',
     cnpj: '',
     endereco: '',
@@ -11,6 +12,7 @@ function Fornecedores() {
     email: '',
     contato: ''
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchFornecedores();
@@ -32,12 +34,38 @@ function Fornecedores() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/fornecedores', formData);
+      if (isEditing) {
+        await axios.put(`http://localhost:3000/fornecedores/${formData.id}`, formData);
+        setIsEditing(false);
+      } else {
+        await axios.post('http://localhost:3000/fornecedores', formData);
+      }
       fetchFornecedores();
-      setFormData({ nome: '', cnpj: '', endereco: '', telefone: '', email: '', contato: '' });
+      setFormData({ id: null, nome: '', cnpj: '', endereco: '', telefone: '', email: '', contato: '' });
     } catch (error) {
-      console.error('Erro ao cadastrar fornecedor:', error);
+      console.error('Erro ao salvar fornecedor:', error);
     }
+  };
+
+  const handleEdit = (fornecedor) => {
+    setFormData(fornecedor);
+    setIsEditing(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja deletar este fornecedor?')) {
+      try {
+        await axios.delete(`http://localhost:3000/fornecedores/${id}`);
+        fetchFornecedores();
+      } catch (error) {
+        console.error('Erro ao deletar fornecedor:', error);
+      }
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setFormData({ id: null, nome: '', cnpj: '', endereco: '', telefone: '', email: '', contato: '' });
+    setIsEditing(false);
   };
 
   return (
@@ -88,7 +116,26 @@ function Fornecedores() {
             onChange={handleChange}
             placeholder="Contato Principal"
           />
-          <button type="submit">Cadastrar Fornecedor</button>
+          <button type="submit">
+            {isEditing ? 'Atualizar Fornecedor' : 'Cadastrar Fornecedor'}
+          </button>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              style={{
+                backgroundColor: '#6c757d',
+                color: '#fff',
+                padding: '10px',
+                border: 'none',
+                borderRadius: '4px',
+                marginLeft: '10px',
+                cursor: 'pointer'
+              }}
+            >
+              Cancelar
+            </button>
+          )}
         </form>
       </div>
 
@@ -104,6 +151,7 @@ function Fornecedores() {
               <th>Telefone</th>
               <th>E-mail</th>
               <th>Contato</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -116,6 +164,35 @@ function Fornecedores() {
                 <td>{fornecedor.telefone}</td>
                 <td>{fornecedor.email}</td>
                 <td>{fornecedor.contato}</td>
+                <td>
+                  <button
+                    onClick={() => handleEdit(fornecedor)}
+                    style={{
+                      backgroundColor: '#ffc107',
+                      color: '#fff',
+                      padding: '5px 10px',
+                      border: 'none',
+                      borderRadius: '4px',
+                      marginRight: '5px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDelete(fornecedor.id)}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: '#fff',
+                      padding: '5px 10px',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Deletar
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
