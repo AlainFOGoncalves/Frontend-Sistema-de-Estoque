@@ -69,3 +69,16 @@ th {
   background-color: #f8f8f8;
   color: #555;
 }
+
+.form-container select {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.table-container button:hover {
+  background-color: #c82333;
+}
